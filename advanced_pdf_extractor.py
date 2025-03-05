@@ -136,7 +136,7 @@ class AdvancedPDFExtractor:
             messages = [
                 {
                     "role": "system",
-                    "content": "Vous êtes un expert en analyse de documents. Votre tâche est de fournir une analyse narrative et chronologique du contenu de l'image. Concentrez-vous sur :\n\n1. L'organisation temporelle des événements\n2. Les actions principales par période\n3. Les dépendances entre les différentes phases\n4. Les points critiques du planning\n\nStructurez votre réponse de manière chronologique, en regroupant les activités par thèmes et périodes. Utilisez un style narratif et explicatif plutôt qu'une simple énumération."
+                    "content": system_prompt
                 },
                 {
                     "role": "user",
@@ -251,40 +251,6 @@ Structurez votre réponse en sections claires :
             logger.error(error_msg)
             raise
 
-    def _convert_markdown_to_pdf(self, markdown_content: str, output_path: Path) -> str:
-        """
-        Convertit le contenu markdown en PDF en utilisant PyMuPDF.
-        
-        Args:
-            markdown_content (str): Contenu markdown à convertir
-            output_path (Path): Chemin du fichier markdown
-        
-        Returns:
-            str: Chemin du fichier PDF généré
-        """
-        try:
-            log_message("Conversion du markdown en PDF")
-            
-            # Créer un nouveau document PDF
-            pdf_path = output_path.with_suffix('.pdf')
-            doc = fitz.open()
-            
-            # Ajouter une page et insérer le texte
-            page = doc.new_page()
-            page.insert_text((50, 50), markdown_content)
-            
-            # Sauvegarder le PDF
-            doc.save(pdf_path)
-            doc.close()
-            
-            log_message(f"PDF généré avec succès : {pdf_path}")
-            return str(pdf_path)
-            
-        except Exception as e:
-            error_msg = f"Erreur lors de la conversion en PDF : {str(e)}"
-            logger.error(error_msg)
-            raise
-
     def extract_from_pdf(
         self,
         pdf_path: str,
@@ -356,57 +322,6 @@ Structurez votre réponse en sections claires :
             error_msg = f"Erreur lors du traitement du PDF : {str(e)}"
             logger.error(error_msg)
             raise
-
-    def process_directory(
-        self,
-        input_dir: str,
-        extract_images: bool = True,
-        image_format: str = "png",
-        dpi: int = 300,
-        max_pages: Optional[int] = None
-    ) -> List[Dict]:
-        """
-        Traite tous les PDF dans un répertoire.
-        
-        Args:
-            input_dir (str): Répertoire contenant les PDF
-            extract_images (bool): Si True, extrait aussi les images
-            image_format (str): Format des images extraites
-            dpi (int): Résolution des images extraites
-            max_pages (int, optional): Nombre maximum de pages à traiter par PDF
-        """
-        results = []
-        input_path = Path(input_dir)
-        
-        if not input_path.exists():
-            raise ValueError(f"Le répertoire {input_dir} n'existe pas")
-        
-        pdf_files = list(input_path.glob("*.pdf"))
-        log_message(f"Nombre de fichiers PDF trouvés : {len(pdf_files)}")
-        
-        for pdf_file in pdf_files:
-            try:
-                pages = list(range(max_pages)) if max_pages is not None else None
-                result = self.extract_from_pdf(
-                    pdf_path=str(pdf_file),
-                    extract_images=extract_images,
-                    pages=pages,
-                    image_format=image_format,
-                    dpi=dpi
-                )
-                results.append({
-                    'pdf_path': str(pdf_file),
-                    'extraction_result': result
-                })
-            except Exception as e:
-                error_msg = f"Erreur lors du traitement de {pdf_file}: {str(e)}"
-                logger.error(error_msg)
-                results.append({
-                    'pdf_path': str(pdf_file),
-                    'error': str(e)
-                })
-        
-        return results
 
 def main():
     """Point d'entrée principal du programme."""

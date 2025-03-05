@@ -1,0 +1,16 @@
+# Dépendances principales
+PyMuPDF==1.23.8  # pour fitz (manipulation de PDF)
+Pillow==10.2.0   # pour PIL (traitement d'images)
+openai==1.12.0   # pour l'API OpenAI
+python-dotenv==1.0.1  # pour la gestion des variables d'environnement
+Markdown==3.5.2   # pour le traitement markdown
+
+# Dépendances standard de Python (pas besoin d'installation)
+# pathlib
+# json
+# base64
+# logging
+# os
+# sys
+# io
+# time
